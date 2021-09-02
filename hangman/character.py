@@ -4,57 +4,67 @@ import os
 class Character(pygame.sprite.Sprite):
     def __init__(self):
         super(Character, self).__init__()
-        #adding all the images to sprite array
-        self.animations = [[], [], [], []]
-        print(self.animations)
+        self.animations = [[] for x in range(5)]
         
         self.add_to_animation_matrix(0, 'idle1')
         self.add_to_animation_matrix(1, 'running')
         self.add_to_animation_matrix(2, 'jump')
         self.add_to_animation_matrix(3, 'attack1')
+        self.add_to_animation_matrix(4, 'fall')
  
-        self.row = 0
-        self.column = 0
-        self.right = True
-        self.x = 5
-        self.y = 450
-        self.lateral_speed = 6
-        self.jumping = False
-        self.step = 0
+        self.row : int = 0
+        self.column : int = 0
+        self.right : bool = True
+        self.x : int = 5
+        self.y : int = 450
+        self.lateral_speed : int = 6
+        self.jumping : bool = False
+        self.step : int = 0
  
         self.image = self.animations[self.row][self.column]
  
         self.rect = pygame.Rect(self.x, self.y, 90, 238)
     
-    def add_to_animation_matrix(self, i, dir):
+    def add_to_animation_matrix(self, i, dir) -> None:
         for filename in os.listdir('character_sprite/Individual Sprites/' + dir + '/'):
                 self.animations[i].append(pygame.image.load(os.path.join('character_sprite/Individual Sprites/' + dir + '/', filename)))
 
-    def run_animation(self, dir):
+    def run_animation(self, dir : bool) -> None:
         self.right = dir
         if self.right:
             self.x += self.lateral_speed
         else:
             self.x -= self.lateral_speed
         self.rect = pygame.Rect(self.x, self.y, 90, 238)
-        self.row = 1
+        if not self.jumping:
+            self.row = 1
+        else:
+            self.non_movement_animation(2)
     
-    def non_movement_animation(self, i):
-        self.row = i
+
+    def attack_animation(self) -> None:
+        self.row = 3
+
+    def non_movement_animation(self, i : int) -> None:
+        if self.jumping and self.step > 2:
+            self.row = 4
+        else:
+            self.row = i
     
-    def jump_animation(self):
+    def jump_animation(self) -> None:
         # Figure out if they are touching the ground
-        if self.y > 50:
+        
+        if self.y  >= 450:
             self.row = 2
             self.jumping = True
     
     def calculate_height(self):
         if self.step < 8:
-            self.y -= 4.2 * (self.y * .01)
+            self.y -= 10.2 * ((1/self.y) * 500)
             self.step += 1
         else:
             if self.step < 16:
-                self.y += 4.2 * (self.y * .01)
+                self.y += 10.2 * ((1/self.y) * 500)
                 self.step += 1
             else:
                 self.step = 0

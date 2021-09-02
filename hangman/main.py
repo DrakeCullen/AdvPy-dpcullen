@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import pygame
 import os
 import sys
@@ -62,7 +64,7 @@ def determine_player_action(player : character.Character, key_input : pygame.key
         if key_input[pygame.K_UP]:
             player.jump_animation()
         if key_input[pygame.K_SPACE]:
-            player.non_movement_animation(3)
+            player.attack_animation()
     else:
         player.non_movement_animation(0)
 
