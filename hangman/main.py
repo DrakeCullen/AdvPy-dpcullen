@@ -2,11 +2,9 @@ import pygame
 import os
 import sys
 
-scriptpath = "./character.py"
-
-sys.path.append(os.path.abspath(scriptpath))
+characterPath = "./character.py"
+sys.path.append(os.path.abspath(characterPath))
 BACKGROUND_COLOR = pygame.Color('white') 
-
 
 import character
 
@@ -16,69 +14,57 @@ def pygame_setup(width : int, height: int) -> None:
     return screen
 
 
-def menu(screen) -> None:
+def menu(screen : pygame) -> None:
     showMenu : bool = True
     while showMenu:
         pygame.display.update()
         for event in pygame.event.get():
             showMenu = quit(event)
             if start_game(event):
-                game_loop(screen)
+                showMenu = game_loop(screen)
             
-
 
 def game_loop(screen) -> None:
     playing : bool = True
-    player = character.Character()
-    player_sprite = pygame.sprite.Group(player)
- 
-    clock = pygame.time.Clock()
+    player : character.Character = character.Character()
+    player_sprite : pygame.sprite = pygame.sprite.Group(player)
+    clock : pygame.time = pygame.time.Clock()
+
     while playing:
         pygame.display.update()
         for event in pygame.event.get():
-            playing = quit(event)
+            if not quit(event):
+                return False
 
         key_input = pygame.key.get_pressed()  
-        if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_SPACE]:
-            if key_input[pygame.K_LEFT]:
-                player.run_animation(False)
-            if key_input[pygame.K_RIGHT]:
-                player.run_animation(True)
-            if key_input[pygame.K_UP]:
-                player.jump_animation()
-            if key_input[pygame.K_SPACE]:
-                player.non_movement_animation(3)
-        else:
-            player.non_movement_animation(0)
+        determine_player_action(player, key_input)
+       
         player_sprite.update()
- 
-        #filling the screen with background color
         screen.fill(BACKGROUND_COLOR)
- 
-        #drawing the sprite
         player_sprite.draw(screen)
- 
-        #updating the display
         pygame.display.update()
- 
-        #finally delaying the loop to with clock tick for 10fps 
-        clock.tick(10)
-
+        clock.tick(15)
 
 def quit(event) -> bool:
-    if event.type == pygame.QUIT:
-        return False
-    return True
-
+    return event.type != pygame.QUIT
 
 
 def start_game(event) -> bool:
     if event.type == pygame.MOUSEBUTTONDOWN:
-        if event.pos[0] in range(0, 800) and event.pos[1] in range(0, 500):
-            return True
-    return False
-                                    
+        return event.pos[0] in range(0, 800) and event.pos[1] in range(0, 500)
 
+def determine_player_action(player : character.Character, key_input : pygame.key):
+    if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_SPACE]:
+        if key_input[pygame.K_LEFT]:
+            player.run_animation(False)
+        if key_input[pygame.K_RIGHT]:
+            player.run_animation(True)
+        if key_input[pygame.K_UP]:
+            player.jump_animation()
+        if key_input[pygame.K_SPACE]:
+            player.non_movement_animation(3)
+    else:
+        player.non_movement_animation(0)
 
  
 if __name__ == '__main__':
