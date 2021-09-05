@@ -40,7 +40,7 @@ class Enemy(pygame.sprite.Sprite):
         if abs(player_x - self.x) > 300:
             self.row = 0
         else:
-            if  abs(player_x - self.x) < 70:
+            if  abs(player_x - self.x) < 80:
                 self.row = 3
             else: 
                 self.row = 1
