@@ -16,7 +16,7 @@ class Character(pygame.sprite.Sprite):
         self.row : int = 0
         self.column : int = 0
         self.right : bool = True
-        self.x : int = 5
+        self.x : int = 600
         self.y : int = 560
         self.lateral_speed : int = 16
         self.jumping : bool = False
@@ -112,6 +112,9 @@ class Character(pygame.sprite.Sprite):
 
     def coordinates(self) :
         return self.x
+
+    def coordinates_and_dir(self):
+        return self.x, self.right
     
     def update(self):
         if self.jumping:

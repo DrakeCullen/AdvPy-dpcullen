@@ -8,9 +8,12 @@ characterPath = "./character.py"
 sys.path.append(os.path.abspath(characterPath))
 enemyPath = "./enemy.py"
 sys.path.append(os.path.abspath(enemyPath))
+dragonPath = "./dragon.py"
+sys.path.append(os.path.abspath(dragonPath))
 
 import character
 import enemy
+import dragon
 
 WIDTH = 1000
 HEIGHT = 650
@@ -39,7 +42,9 @@ def game_loop(screen) -> None:
     player_sprite : pygame.sprite = pygame.sprite.Group(player)
     clock : pygame.time = pygame.time.Clock()
     just_jumped : bool = False
-    enemies, enemy_sprites = create_enemies(6)
+    enemies, enemy_sprites = create_enemies(0)
+    dragons : dragon.Dragon = dragon.Dragon(10, 450)
+    dragon_sprite : pygame.sprite = pygame.sprite.Group(dragons)
 
     while playing:
         pygame.display.update()
@@ -49,18 +54,11 @@ def game_loop(screen) -> None:
 
         key_input = pygame.key.get_pressed()  
         just_jumped = determine_player_action(player, key_input, just_jumped)
+        x, dir = player.coordinates_and_dir()
+        dragons.attack_player(x, dir)
        
-        '''  enemys.non_movement_animation(1)
-        player_sprite.update()
-        enemy_sprite.update()
-        enemy_sprite2.update()
-        screen.blit(BACKGROUND, [0,0])        
-        player_sprite.draw(screen)
-        enemy_sprite.draw(screen)
-        enemy_sprite2.draw(screen) 
-        '''
-        
-        update_screen(enemies, enemy_sprites, player, player_sprite, screen)
+
+        update_screen(enemies, enemy_sprites, player, player_sprite, dragons, dragon_sprite, screen)
         checkCollision(enemies, enemy_sprites, player, screen)
         pygame.display.update()
         
@@ -88,7 +86,7 @@ def create_enemies(size : int):
         enemy_sprites.append(enemy_sprite)
     return enemies, enemy_sprites
 
-def update_screen(enemies, enemy_sprites, player, player_sprite, screen):
+def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_sprite, screen):
     screen.blit(BACKGROUND, [0,0])   
     for i in range(len(enemies)):
         enemies[i].attack_player(player.coordinates())
@@ -96,6 +94,8 @@ def update_screen(enemies, enemy_sprites, player, player_sprite, screen):
         enemy_sprites[i].draw(screen)
     player_sprite.update()
     player_sprite.draw(screen)
+    dragon_sprite.update()
+    dragon_sprite.draw(screen)
 
 def determine_player_action(player : character.Character, key_input : pygame.key, just_jumped):
     if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_SPACE] or key_input[pygame.K_DOWN]:

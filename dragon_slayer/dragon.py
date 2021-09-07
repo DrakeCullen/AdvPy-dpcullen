@@ -2,16 +2,18 @@ import pygame
 import os
 import random
 
-class Enemy(pygame.sprite.Sprite):
+class Dragon(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        super(Enemy, self).__init__()
-        self.animations = [[] for x in range(4)]
-        self.directory : str = str(random.randrange(1,10))
+        super(Dragon, self).__init__()
+        self.animations = [[] for x in range(7)]
         
         self.add_to_animation_matrix(0, 'idle')
         self.add_to_animation_matrix(1, 'walk')
-        #self.add_to_animation_matrix(2, 'jump')
-        self.add_to_animation_matrix(3, 'attack')
+        self.add_to_animation_matrix(2, 'attack1')
+        self.add_to_animation_matrix(3, 'attack2')
+        self.add_to_animation_matrix(4, 'attack3')
+        self.add_to_animation_matrix(5, 'attack4')
+        self.add_to_animation_matrix(6, 'attack5')
 
 
  
@@ -20,11 +22,12 @@ class Enemy(pygame.sprite.Sprite):
         self.right : bool = True
         self.x : int = x
         self.y : int = y
-        self.lateral_speed : int = random.randrange(3,9)
-        self.width : int = 90
-        self.height : int = 73
+        self.lateral_speed : int = 14
+        self.width : int = 280
+        self.height : int =  250
         self.neg : int = 1
-        self.health: int = random.randrange(1,6)
+        self.health: int = 14
+        self.counter = 0
  
         self.image = self.animations[self.row][self.column]
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -32,26 +35,26 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
     
     def add_to_animation_matrix(self, i, dir) -> None:
-        for filename in os.listdir('enemy_sprite/' + self.directory + '/' + dir + '/'):
-                self.animations[i].append(pygame.image.load(os.path.join('enemy_sprite/' + self.directory + '/' + dir + '/', filename)))
+        for filename in os.listdir('dragon/' + dir + '/'):
+                self.animations[i].append(pygame.image.load(os.path.join('dragon/' + dir + '/', filename)))
 
 
-    def attack_player(self, player_x) -> None:
-        if abs(player_x - self.x) > 300:
-            self.row = 0
-        else:
-            if  abs(player_x - self.x) < 80:
-                self.row = 3
-            else: 
-                self.row = 1
-            if player_x < self.x:
-                self.right = False
-                self.x -= self.lateral_speed
-            else:
-                self.right = True
-                self.x += self.lateral_speed
+    def attack_player(self, player_x, player_right) -> None:
+        if not self.right and  abs(player_x - self.x) < 20 :
+            self.row = 2
+            if (self.right and player_right) or (self.right and not player_right):
+                self.right = not self.right  
+        else: 
+            self.row = 1
+            self.counter += 1
+            if self.counter > 20:
+                if random.randrange(2) == 1: 
+                    self.neg *= -1
+                    self.right = not self.right
+                self.counter = 0
+            self.x += self.lateral_speed * self.neg
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-
+        
     def coordinates(self) :
         if not self.right:
             return self.x + 30, self.y, 25, self.height
