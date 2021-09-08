@@ -3,6 +3,8 @@
 import pygame
 import os
 import sys
+import pygame.freetype
+
 
 characterPath = "./character.py"
 sys.path.append(os.path.abspath(characterPath))
@@ -22,6 +24,10 @@ WIDTH = 1000
 HEIGHT = 650
 BACKGROUND = pygame.image.load("background.png")
 BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT))
+HEART = pygame.image.load("heart.png")
+HEART = pygame.transform.scale(HEART, (60, 60))
+pygame.init()
+GAME_FONT = pygame.freetype.SysFont("Comic Sans MS", 36)
 
 def pygame_setup(width : int, height: int) -> None:
     screen = pygame.display.set_mode((width, height))
@@ -45,10 +51,12 @@ def game_loop(screen) -> None:
     player_sprite : pygame.sprite = pygame.sprite.Group(player)
     clock : pygame.time = pygame.time.Clock()
     just_jumped : bool = False
-    enemies, enemy_sprites = create_enemies(1)
-    dragons : dragon.Dragon = dragon.Dragon(150, 450)
+    enemies, enemy_sprites = create_enemies(3, screen)
+    dragons : dragon.Dragon = dragon.Dragon(150, 450, screen)
     dragon_sprite : pygame.sprite = pygame.sprite.Group(dragons)
     hurt_timer : int = 0
+    score = 5000
+    
 
     while playing:
         pygame.display.update()
@@ -64,10 +72,11 @@ def game_loop(screen) -> None:
 
         update_screen(enemies, enemy_sprites, player, player_sprite, dragons, dragon_sprite, screen)
         hurt_timer, playing = checkCollision(enemies, enemy_sprites, player, dragons, hurt_timer, screen)
+        GAME_FONT.render_to(screen, (30, 20), f"Score: {score}", (255, 255, 255))
         pygame.display.update()
-        
         clock.tick(13)
         hurt_timer += 1
+        score -= 1
 
 
 def quit(event) -> bool:
@@ -79,11 +88,11 @@ def start_game(event) -> bool:
         return event.pos[0] in range(0, WIDTH) and event.pos[1] in range(0, HEIGHT)
     
 
-def create_enemies(size : int):
+def create_enemies(size : int, surface):
     enemies = []
     enemy_sprites = []
     for i in range(size):
-        enemys : enemy.Enemy = enemy.Enemy(120 + i*150, 560)
+        enemys : enemy.Enemy = enemy.Enemy(120 + i*150, 560, surface)
         enemy_sprite : pygame.sprite = pygame.sprite.Group(enemys)
         if i % 2:
             enemys.flip()
@@ -93,6 +102,7 @@ def create_enemies(size : int):
 
 def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_sprite, screen):
     screen.blit(BACKGROUND, [0,0])   
+    draw_hearts(player) 
     for i in range(len(enemies)):
         enemies[i].attack_player(player.coordinates())
         enemy_sprites[i].update()
@@ -102,19 +112,23 @@ def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_
     dragon_sprite.update(screen)
     dragon_sprite.draw(screen)
 
+
+def draw_hearts(player):
+    for i in range(player.get_hearts()):
+        screen.blit(HEART, [950 - i * 50,10]) 
+
 def determine_player_action(player : character.Character, key_input : pygame.key, just_jumped):
     if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_SPACE] or key_input[pygame.K_DOWN]:
-        if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP]:
-            if key_input[pygame.K_UP]:
-                player.jump_animation(False)
-            if key_input[pygame.K_LEFT]:
-                player.run_animation(False)
-            if key_input[pygame.K_RIGHT]:
-                player.run_animation(True)
-        elif key_input[pygame.K_SPACE]:
+        if key_input[pygame.K_UP]:
+            player.jump_animation(False)
+        if key_input[pygame.K_LEFT]:
+            player.run_animation(False)
+        if key_input[pygame.K_RIGHT]:
+            player.run_animation(True)
+        if key_input[pygame.K_SPACE]:
             player.attack_animation()
             return True
-        elif key_input[pygame.K_DOWN]:
+        if key_input[pygame.K_DOWN]:
             player.crouch_animation()
     else:
         player.non_movement_animation(0)
@@ -127,6 +141,7 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
         x, y, width, height = enemies[i].coordinates()
         if player.enemy_collision(x, y, width, height, timer) != "None":
             if player.enemy_collision(x, y, width, height, timer) == "Hit":
+                screen.fill((0,255,0), special_flags = pygame.BLEND_MULT)
                 if enemies[i].hurt():
                     del enemies[i]  
                     del enemy_sprites[i]  
@@ -135,13 +150,14 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
             timer = 0
     x, y, width, height = dragons.coordinates()
     if player.dragon_collision(x, y, width, height, timer) != "None":
-            if player.dragon_collision(x, y, width, height, timer) == "Hit":
-                if dragons.hurt():
-                    del dragons
-                    return timer, False
-            elif timer > 20:    
-                screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
-            timer = 0
+        if player.dragon_collision(x, y, width, height, timer) == "Hit":
+            screen.fill((0,255,0), special_flags = pygame.BLEND_MULT)
+            if dragons.hurt():
+                del dragons
+                return timer, False
+        elif timer > 20:    
+            screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
+        timer = 0
                     
     x, y = player.x_y_coordinates()
     hearts = player.get_hearts()

@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(fireballPath))
 import fireball
 
 class Dragon(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, surface):
         super(Dragon, self).__init__()
         self.animations = [[] for x in range(7)]
         
@@ -28,9 +28,10 @@ class Dragon(pygame.sprite.Sprite):
         self.width : int = 280
         self.height : int =  250
         self.neg : int = 1
-        self.health: int = 14
+        self.health: int = 20
         self.counter = 0
         self.last_hurt_time = datetime.datetime.now()
+        self.surface = surface
         
         self.fireballs = []
         self.fireball_sprites = []
@@ -83,6 +84,7 @@ class Dragon(pygame.sprite.Sprite):
         if self.health <= 0:
             return True
         return False
+        
 
     def wall_collision(self) -> bool:
         if  self.x + self.width <= self.width:
@@ -108,9 +110,22 @@ class Dragon(pygame.sprite.Sprite):
                 hearts -= 1
                 print(hearts)
         return hearts
+
+    def draw_health_bar(self):
+        if self.health > 6:
+            if not self.right:
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + self.width / 5, 550, 8 * self.health, 10))
+            else:
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + 100, 550, 8 * self.health, 10))
+        else:
+            if not self.right:
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + self.width / 5, 550, 12 * self.health, 10))
+            else:
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + 100, 550, 12 * self.health, 10))
     
     
     def update(self, screen):
+        self.draw_health_bar()
         for i in range(len(self.fireballs)):
             self.fireballs[i].move()
             self.fireball_sprites[i].update()

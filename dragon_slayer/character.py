@@ -1,5 +1,8 @@
 import pygame
 import os
+import datetime
+import math
+
 
 class Character(pygame.sprite.Sprite):
     def __init__(self):
@@ -25,7 +28,9 @@ class Character(pygame.sprite.Sprite):
         self.player_width : int = 35
         self.width_right : int = 67
         self.player_height : int = 40
-        self.hearts : int = 5
+        self.hearts : int = 7
+        self.last_hit_time = datetime.datetime.now()
+        self.attack_time = 0
  
         self.image = self.animations[self.row][self.column]
  
@@ -51,7 +56,17 @@ class Character(pygame.sprite.Sprite):
     
 
     def attack_animation(self) -> None:
-        self.row = 3
+        if  self.attack_time < 8 :
+            self.row = 3
+            self.attack_time += 1
+        else:
+            if  self.attack_time > 18 :
+                self.attack_time = 0
+                self.column = 0
+            else:
+                self.attack_time += 1    
+            self.non_movement_animation(0)
+
 
     def non_movement_animation(self, i : int) -> None:
         self.player_height = 0
@@ -105,7 +120,7 @@ class Character(pygame.sprite.Sprite):
                     print("hit")
                     return "Hit"
                 elif timer > 20:
-                    self.hearts -= 1
+                    self.hearts -= .5
                     print(self.hearts)
                     return "Hurt"
         return "None"
@@ -135,7 +150,7 @@ class Character(pygame.sprite.Sprite):
         return self.x, self.right
     
     def get_hearts(self):
-        return self.hearts
+        return math.floor(self.hearts)
     
     def set_hearts(self, hearts):
         self.hearts = hearts
