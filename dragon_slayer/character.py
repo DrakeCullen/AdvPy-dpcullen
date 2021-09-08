@@ -24,7 +24,7 @@ class Character(pygame.sprite.Sprite):
         self.ground : int = 560
         self.player_width : int = 35
         self.width_right : int = 67
-        self.player_height : int = 0
+        self.player_height : int = 40
         self.hearts : int = 5
  
         self.image = self.animations[self.row][self.column]
@@ -75,7 +75,7 @@ class Character(pygame.sprite.Sprite):
     
     def calculate_height(self):
         if self.step < 8:
-            self.y -= 18.2 * ((1/self.y) * 500)
+            self.y -= 20.2 * ((1/self.y) * 500)
             self.step += 1
         else:
             if self.y + 20 < self.ground:
@@ -97,24 +97,48 @@ class Character(pygame.sprite.Sprite):
             return True
         return False
     
-    def enemy_collision(self, enemy_x, enemy_y, enemy_width, enemy_height) -> str:
+    def enemy_collision(self, enemy_x, enemy_y, enemy_width, enemy_height, timer) -> str:
         player_x = self.x
 
         if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y + self.player_height >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
                 if self.row == 3:
                     print("hit")
                     return "Hit"
-                else:
+                elif timer > 20:
                     self.hearts -= 1
+                    print(self.hearts)
+                    return "Hurt"
+        return "None"
+    
+    def dragon_collision(self, enemy_x, enemy_y, enemy_width, enemy_height, timer) -> str:
+        player_x = self.x
+
+        if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y - 100 >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
+                if self.row == 3:
+                    print("hit")
+                    return "Hit"
+                elif timer > 20:
+                    self.hearts -= .5
                     print(self.hearts)
                     return "Hurt"
         return "None"
 
     def coordinates(self) :
         return self.x
+    
+    def x_y_coordinates(self):
+        if not self.right:
+                return self.x - 30, self.y
+        return self.x, self.y
 
     def coordinates_and_dir(self):
         return self.x, self.right
+    
+    def get_hearts(self):
+        return self.hearts
+    
+    def set_hearts(self, hearts):
+        self.hearts = hearts
     
     def update(self):
         if self.jumping:
