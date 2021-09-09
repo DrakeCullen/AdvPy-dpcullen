@@ -15,6 +15,8 @@ sys.path.append(os.path.abspath(dragonPath))
 fireballPath = "./fireball.py"
 sys.path.append(os.path.abspath(fireballPath))
 
+
+
 import character
 import enemy
 import dragon
@@ -55,9 +57,14 @@ def game_loop(screen) -> None:
     dragons : dragon.Dragon = dragon.Dragon(150, 450, screen)
     dragon_sprite : pygame.sprite = pygame.sprite.Group(dragons)
     hurt_timer : int = 0
+    counter = 0
+    attacking = False
     score = 5000
+    pygame.mixer.init()
+    pygame.mixer.music.load('music.wav')
+    pygame.mixer.music.play()
+    pygame.mixer.music.set_volume(0.2)
     
-
     while playing:
         pygame.display.update()
         for event in pygame.event.get():
@@ -65,7 +72,7 @@ def game_loop(screen) -> None:
                 return False
 
         key_input = pygame.key.get_pressed()  
-        just_jumped = determine_player_action(player, key_input, just_jumped)
+        attacking, counter, just_jumped = determine_player_action(player, key_input, just_jumped, attacking, counter)
         x, dir = player.coordinates_and_dir()
         dragons.attack_player(x, dir)
        
@@ -117,22 +124,33 @@ def draw_hearts(player):
     for i in range(player.get_hearts()):
         screen.blit(HEART, [950 - i * 50,10]) 
 
-def determine_player_action(player : character.Character, key_input : pygame.key, just_jumped):
-    if key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_SPACE] or key_input[pygame.K_DOWN]:
+def determine_player_action(player : character.Character, key_input : pygame.key, just_jumped, attacking, count):
+    if  key_input[pygame.K_SPACE] and count < 8:
+        attacking = True
+    if attacking:
+        if count < 8:
+            player.attack_animation()
+            count+=1
+        else:
+            attacking = False
+        return attacking, count, True
+    elif key_input[pygame.K_LEFT] or key_input[pygame.K_RIGHT] or key_input[pygame.K_UP] or key_input[pygame.K_DOWN]:
         if key_input[pygame.K_UP]:
             player.jump_animation(False)
         if key_input[pygame.K_LEFT]:
             player.run_animation(False)
         if key_input[pygame.K_RIGHT]:
             player.run_animation(True)
-        if key_input[pygame.K_SPACE]:
-            player.attack_animation()
-            return True
         if key_input[pygame.K_DOWN]:
             player.crouch_animation()
     else:
         player.non_movement_animation(0)
-    return False
+    if attacking == False:
+        count += 1
+    if count > 21:
+        count = 0
+
+    return attacking, count, False
 
 
 def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):

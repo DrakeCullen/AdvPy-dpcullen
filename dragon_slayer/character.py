@@ -56,7 +56,8 @@ class Character(pygame.sprite.Sprite):
     
 
     def attack_animation(self) -> None:
-        if  self.attack_time < 8 :
+        self.row = 3
+        """ if  self.attack_time < 8 :
             self.row = 3
             self.attack_time += 1
         else:
@@ -66,8 +67,7 @@ class Character(pygame.sprite.Sprite):
             else:
                 self.attack_time += 1    
             self.non_movement_animation(0)
-
-
+        """
     def non_movement_animation(self, i : int) -> None:
         self.player_height = 0
         if self.jumping and self.step > 1:
@@ -117,11 +117,9 @@ class Character(pygame.sprite.Sprite):
 
         if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y + self.player_height >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
                 if self.row == 3:
-                    print("hit")
                     return "Hit"
                 elif timer > 20:
                     self.hearts -= .5
-                    print(self.hearts)
                     return "Hurt"
         return "None"
     
@@ -130,11 +128,9 @@ class Character(pygame.sprite.Sprite):
 
         if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y - 100 >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
                 if self.row == 3:
-                    print("hit")
                     return "Hit"
                 elif timer > 20:
                     self.hearts -= .5
-                    print(self.hearts)
                     return "Hurt"
         return "None"
 

@@ -105,7 +105,7 @@ class Dragon(pygame.sprite.Sprite):
     def fire_collision(self, player_x, player_y, hearts):
         for i in range(len(self.fireballs)):
             enemy_x, enemy_y, enemy_width, enemy_height = self.fireballs[i].coordinates()
-            if  (datetime.datetime.now() - self.last_hurt_time).total_seconds() > 2 and player_x <= enemy_x + enemy_width and player_x + 67 >= enemy_x and player_y + 40 >= enemy_y:
+            if  (datetime.datetime.now() - self.last_hurt_time).total_seconds() > 2 and player_x <= enemy_x + enemy_width and player_x + 67 >= enemy_x and player_y + 10 >= enemy_y:
                 self.last_hurt_time = datetime.datetime.now()
                 hearts -= 1
                 print(hearts)
