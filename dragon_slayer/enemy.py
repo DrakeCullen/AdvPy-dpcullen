@@ -38,7 +38,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
     def attack_player(self, player_x) -> None:
-        if abs(player_x - self.x) > 300:
+        if abs(player_x - self.x) > 600:
             self.row = 0
         else:
             if  abs(player_x - self.x) < 80:
@@ -65,9 +65,9 @@ class Enemy(pygame.sprite.Sprite):
         self.health -= 1
         if self.health > 0:
             if self.right:
-                self.x -= 45 
+                self.x -= 65 
             else:
-                self.x += 45
+                self.x += 65
         else:
             return True
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)

@@ -28,7 +28,7 @@ class Character(pygame.sprite.Sprite):
         self.player_width : int = 35
         self.width_right : int = 67
         self.player_height : int = 40
-        self.hearts : int = 7
+        self.hearts : int = 15
         self.last_hit_time = datetime.datetime.now()
         self.attack_time = 0
  

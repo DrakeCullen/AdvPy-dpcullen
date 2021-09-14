@@ -14,37 +14,43 @@ dragonPath = "./dragon.py"
 sys.path.append(os.path.abspath(dragonPath))
 fireballPath = "./fireball.py"
 sys.path.append(os.path.abspath(fireballPath))
+constants = "./constants.py"
+sys.path.append(os.path.abspath(constants))
 
 
+pygame.init()
 
+from constants import WIDTH, HEIGHT, BACKGROUND, HEART, GOLDHEART, NOATTACK, GAME_FONT, HOME, INSTRUCTIONS
 import character
 import enemy
 import dragon
 import fireball
 
-WIDTH = 1000
-HEIGHT = 650
-BACKGROUND = pygame.image.load("background.png")
-BACKGROUND = pygame.transform.scale(BACKGROUND, (WIDTH, HEIGHT))
-HEART = pygame.image.load("heart.png")
-HEART = pygame.transform.scale(HEART, (60, 60))
-pygame.init()
-GAME_FONT = pygame.freetype.SysFont("Comic Sans MS", 36)
 
 def pygame_setup(width : int, height: int) -> None:
     screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption("Game title goes here")  
+    pygame.display.set_caption("Dragon Slayer")  
+    screen.blit(HOME, [0,0])   
     return screen
 
 
 def menu(screen : pygame) -> None:
-    showMenu : bool = True
+    state = "Menu"
+    showMenu = True
     while showMenu:
         pygame.display.update()
         for event in pygame.event.get():
             showMenu = quit(event)
-            if start_game(event):
-                showMenu = game_loop(screen)
+            state = start_game(event)
+            if state == "Menu":
+                screen.blit(HOME, [0,0])  
+            elif state == "Controls":
+                screen.blit(INSTRUCTIONS, [0,0])  
+            elif state == "Leaderboard":
+                print("leaderboard")
+                screen.blit(BACKGROUND, [0,0])  
+            elif state == "Start":
+                game_loop(screen)
             
 
 def game_loop(screen) -> None:
@@ -59,7 +65,8 @@ def game_loop(screen) -> None:
     hurt_timer : int = 0
     counter = 0
     attacking = False
-    score = 5000
+    score = 5000 
+    enemies_remaining = 6
     pygame.mixer.init()
     pygame.mixer.music.load('music.wav')
     pygame.mixer.music.play()
@@ -77,9 +84,12 @@ def game_loop(screen) -> None:
         dragons.attack_player(x, dir)
        
 
-        update_screen(enemies, enemy_sprites, player, player_sprite, dragons, dragon_sprite, screen)
-        hurt_timer, playing = checkCollision(enemies, enemy_sprites, player, dragons, hurt_timer, screen)
+        update_screen(enemies, enemy_sprites, player, player_sprite, dragons, dragon_sprite, screen, hurt_timer)
+        hurt_timer, playing, enemies_remaining = checkCollision(enemies, enemy_sprites, player, dragons, hurt_timer, screen, enemies_remaining)
         GAME_FONT.render_to(screen, (30, 20), f"Score: {score}", (255, 255, 255))
+        GAME_FONT.render_to(screen, (420, 20), f"Enemies: {enemies_remaining + 3}", (255, 255, 255))
+        if counter > 12:
+            screen.blit(NOATTACK, [800,10]) 
         pygame.display.update()
         clock.tick(30)
         hurt_timer += 1
@@ -92,7 +102,16 @@ def quit(event) -> bool:
 
 def start_game(event) -> bool:
     if event.type == pygame.MOUSEBUTTONDOWN:
-        return event.pos[0] in range(0, WIDTH) and event.pos[1] in range(0, HEIGHT)
+        x, y = pygame.mouse.get_pos()
+        if x > 405 and x < 590:
+            if y > 180 and y < 250:
+                return "Controls"
+            elif y > 297 and y < 361:
+                return "Leaderboard"
+            elif y > 408 and y < 468:
+                print("start")
+                return "Start"
+            #return event.pos[0] in range(0, WIDTH) and event.pos[1] in range(0, HEIGHT)
     
 
 def create_enemies(size : int, surface):
@@ -107,9 +126,15 @@ def create_enemies(size : int, surface):
         enemy_sprites.append(enemy_sprite)
     return enemies, enemy_sprites
 
-def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_sprite, screen):
+def replace_enemy(enemies, enemy_sprites, surface):
+    enemys : enemy.Enemy = enemy.Enemy(-80, 560, surface)
+    enemy_sprite : pygame.sprite = pygame.sprite.Group(enemys)
+    enemies.append(enemys)
+    enemy_sprites.append(enemy_sprite)
+
+def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_sprite, screen, counter):
     screen.blit(BACKGROUND, [0,0])   
-    draw_hearts(player) 
+    draw_hearts(player, screen, counter) 
     for i in range(len(enemies)):
         enemies[i].attack_player(player.coordinates())
         enemy_sprites[i].update()
@@ -120,9 +145,12 @@ def update_screen(enemies, enemy_sprites, player, player_sprite, dragon, dragon_
     dragon_sprite.draw(screen)
 
 
-def draw_hearts(player):
-    for i in range(player.get_hearts()):
-        screen.blit(HEART, [950 - i * 50,10]) 
+def draw_hearts(player, hearts, counter):
+    if counter < 40:
+        screen.blit(GOLDHEART, [870,5]) 
+    else:
+        screen.blit(HEART, [870,5]) 
+    GAME_FONT.render_to(screen, (925, 20), f"X {player.get_hearts()}", (255, 255, 255))
 
 def determine_player_action(player : character.Character, key_input : pygame.key, just_jumped, attacking, count):
     if  key_input[pygame.K_SPACE] and count < 8:
@@ -145,7 +173,7 @@ def determine_player_action(player : character.Character, key_input : pygame.key
             player.crouch_animation()
     else:
         player.non_movement_animation(0)
-    if attacking == False:
+    if attacking == False and count >= 12:
         count += 1
     if count > 26:
         count = 0
@@ -153,7 +181,7 @@ def determine_player_action(player : character.Character, key_input : pygame.key
     return attacking, count, False
 
 
-def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
+def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen, enemies_remaining):
     items_to_del = []
     for i in range(len(enemies) -1, -1, -1):
         x, y, width, height = enemies[i].coordinates()
@@ -163,27 +191,33 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
                 if enemies[i].hurt():
                     del enemies[i]  
                     del enemy_sprites[i]  
+                    enemies_remaining -= 1
+                    if enemies_remaining > 0:
+                        replace_enemy(enemies, enemy_sprites, screen)
+                    print(enemies_remaining)
             elif timer > 40:
                 screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
-            timer = 0
+                timer = 0
     x, y, width, height = dragons.coordinates()
     if player.dragon_collision(x, y, width, height, timer) != "None":
-        if player.dragon_collision(x, y, width, height, timer) == "Hit":
+        if player.dragon_collision(x, y, width, height, timer) == "Hit" and enemies_remaining == -2:
             screen.fill((0,255,0), special_flags = pygame.BLEND_MULT)
             if dragons.hurt():
                 del dragons
-                return timer, False
+                enemies_remaining -= 1
+                return timer, False, enemies_remaining
         elif timer > 40:    
             screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
         timer = 0
                     
     x, y = player.x_y_coordinates()
     hearts = player.get_hearts()
-    rem_hearts = dragons.fire_collision(x,y, hearts)
+    rem_hearts, timer = dragons.fire_collision(x,y, hearts, timer)
     player.set_hearts(rem_hearts)
     if hearts != rem_hearts:
         screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
-    return timer, True
+    return timer, True, enemies_remaining
+        
     
     
 
