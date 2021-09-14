@@ -81,7 +81,7 @@ def game_loop(screen) -> None:
         hurt_timer, playing = checkCollision(enemies, enemy_sprites, player, dragons, hurt_timer, screen)
         GAME_FONT.render_to(screen, (30, 20), f"Score: {score}", (255, 255, 255))
         pygame.display.update()
-        clock.tick(13)
+        clock.tick(30)
         hurt_timer += 1
         score -= 1
 
@@ -128,7 +128,7 @@ def determine_player_action(player : character.Character, key_input : pygame.key
     if  key_input[pygame.K_SPACE] and count < 8:
         attacking = True
     if attacking:
-        if count < 8:
+        if count < 12:
             player.attack_animation()
             count+=1
         else:
@@ -147,7 +147,7 @@ def determine_player_action(player : character.Character, key_input : pygame.key
         player.non_movement_animation(0)
     if attacking == False:
         count += 1
-    if count > 21:
+    if count > 26:
         count = 0
 
     return attacking, count, False
@@ -163,7 +163,7 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
                 if enemies[i].hurt():
                     del enemies[i]  
                     del enemy_sprites[i]  
-            elif timer > 20:
+            elif timer > 40:
                 screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
             timer = 0
     x, y, width, height = dragons.coordinates()
@@ -173,7 +173,7 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen):
             if dragons.hurt():
                 del dragons
                 return timer, False
-        elif timer > 20:    
+        elif timer > 40:    
             screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
         timer = 0
                     

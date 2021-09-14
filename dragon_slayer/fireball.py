@@ -8,7 +8,7 @@ class Fireball(pygame.sprite.Sprite):
         self.x : int = x
         self.y : int = y
         self.right : bool = right
-        self.lateral_speed : int = 16
+        self.lateral_speed : int = 8
         self.width : int = 40
         self.height : int =  30
     

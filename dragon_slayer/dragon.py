@@ -24,11 +24,11 @@ class Dragon(pygame.sprite.Sprite):
         self.right : bool = True
         self.x : int = x
         self.y : int = y
-        self.lateral_speed : int = 11
+        self.lateral_speed : int = 6
         self.width : int = 280
         self.height : int =  250
         self.neg : int = 1
-        self.health: int = 20
+        self.health: int = 30
         self.counter = 0
         self.last_hurt_time = datetime.datetime.now()
         self.surface = surface
@@ -62,7 +62,7 @@ class Dragon(pygame.sprite.Sprite):
         
         
     def add_fireball(self):
-        if random.randrange(30) == 1:
+        if random.randrange(50) == 1:
             if self.right:
                 new_fireball : fireball.Fireball = fireball.Fireball(self.x + self.width - 95, 530, self.right)
             else:
@@ -105,7 +105,7 @@ class Dragon(pygame.sprite.Sprite):
     def fire_collision(self, player_x, player_y, hearts):
         for i in range(len(self.fireballs)):
             enemy_x, enemy_y, enemy_width, enemy_height = self.fireballs[i].coordinates()
-            if  (datetime.datetime.now() - self.last_hurt_time).total_seconds() > 2 and player_x <= enemy_x + enemy_width and player_x + 67 >= enemy_x and player_y + 10 >= enemy_y:
+            if  (datetime.datetime.now() - self.last_hurt_time).total_seconds() > 3 and player_x <= enemy_x + enemy_width and player_x + 67 >= enemy_x and player_y + 10 >= enemy_y:
                 self.last_hurt_time = datetime.datetime.now()
                 hearts -= 1
                 print(hearts)
@@ -114,14 +114,14 @@ class Dragon(pygame.sprite.Sprite):
     def draw_health_bar(self):
         if self.health > 6:
             if not self.right:
-                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + self.width / 5, 550, 8 * self.health, 10))
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + self.width / 5, 550, 5 * self.health, 10))
             else:
-                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + 100, 550, 8 * self.health, 10))
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + 100, 550, 5 * self.health, 10))
         else:
             if not self.right:
-                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + self.width / 5, 550, 12 * self.health, 10))
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + self.width / 5, 550, 6 * self.health, 10))
             else:
-                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + 100, 550, 12 * self.health, 10))
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + 100, 550, 6 * self.health, 10))
     
     
     def update(self, screen):

@@ -21,7 +21,7 @@ class Character(pygame.sprite.Sprite):
         self.right : bool = True
         self.x : int = 600
         self.y : int = 560
-        self.lateral_speed : int = 16
+        self.lateral_speed : int = 10
         self.jumping : bool = False
         self.step : int = 0
         self.ground : int = 560
@@ -90,11 +90,11 @@ class Character(pygame.sprite.Sprite):
     
     def calculate_height(self):
         if self.step < 8:
-            self.y -= 20.2 * ((1/self.y) * 500)
+            self.y -= 20.2 * ((1/self.y) * 600)
             self.step += 1
         else:
-            if self.y + 20 < self.ground:
-                self.y += 13.2 * ((1/self.y) * 500)
+            if self.y + 16 < self.ground:
+                self.y += 13.2 * ((1/self.y) * 300)
                 self.step += 1
             else:
                 self.y = self.ground
@@ -115,23 +115,21 @@ class Character(pygame.sprite.Sprite):
     def enemy_collision(self, enemy_x, enemy_y, enemy_width, enemy_height, timer) -> str:
         player_x = self.x
 
-        if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y + self.player_height >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
-                if self.row == 3:
-                    return "Hit"
-                elif timer > 20:
-                    self.hearts -= .5
-                    return "Hurt"
+        if  player_x <= enemy_x + enemy_width + 30 and player_x + self.width_right >= enemy_x -30 and self.y + self.player_height >= enemy_y and self.row == 3: 
+            return "Hit"
+        elif player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y + self.player_height >= enemy_y and timer > 50:
+            self.hearts -= .5
+            return "Hurt"
         return "None"
     
     def dragon_collision(self, enemy_x, enemy_y, enemy_width, enemy_height, timer) -> str:
         player_x = self.x
 
-        if  player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y - 100 >= enemy_y:#not self.y + self.player_height - enemy_height >= enemy_y and not self.y <= enemy_y - enemy_height :
-                if self.row == 3:
-                    return "Hit"
-                elif timer > 20:
-                    self.hearts -= .5
-                    return "Hurt"
+        if  player_x <= enemy_x + enemy_width + 40 and player_x + self.width_right >= enemy_x -40 and self.y - 100 >= enemy_y and self.row == 3:
+            return "Hit"
+        elif player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y - 100 >= enemy_y and timer > 50:
+            self.hearts -= .5
+            return "Hurt"
         return "None"
 
     def coordinates(self) :

@@ -20,11 +20,11 @@ class Enemy(pygame.sprite.Sprite):
         self.right : bool = True
         self.x : int = x
         self.y : int = y
-        self.lateral_speed : int = random.randrange(3,9)
+        self.lateral_speed : int = random.randrange(2,6)
         self.width : int = 90
         self.height : int = 73
         self.neg : int = 1
-        self.health: int = random.randrange(3,10)
+        self.health: int = random.randrange(7,15)
  
         self.image = self.animations[self.row][self.column]
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -76,14 +76,14 @@ class Enemy(pygame.sprite.Sprite):
     def draw_health_bar(self):
         if self.health > 3:
             if not self.right:
-                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + self.width / 2.5, self.y, 10 * self.health, 10))
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + self.width / 2.5, self.y, 5 * self.health, 10))
             else:
-                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + 10, self.y, 10 * self.health, 10))
+                pygame.draw.rect(self.surface, (0,255,0), pygame.Rect(self.x + 6, self.y, 5 * self.health, 10))
         else:
             if not self.right:
-                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + self.width / 2.5, self.y, 10 * self.health, 10))
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + self.width / 2.5, self.y, 5 * self.health, 10))
             else:
-                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + 10, self.y, 10 * self.health, 10))
+                pygame.draw.rect(self.surface, (255,0,0), pygame.Rect(self.x + 10, self.y, 5 * self.health, 10))
     
     def update(self):
         self.draw_health_bar()
