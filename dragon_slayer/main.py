@@ -4,6 +4,7 @@ import pygame
 import os
 import sys
 import pygame.freetype
+from pymongo import MongoClient, MongoClient
 
 
 characterPath = "./character.py"
@@ -37,6 +38,8 @@ def pygame_setup(width : int, height: int) -> None:
 def menu(screen : pygame) -> None:
     state = "Menu"
     showMenu = True
+    dragonSlayer = get_database()
+    res = get_top_five(dragonSlayer)
     while showMenu:
         pygame.display.update()
         for event in pygame.event.get():
@@ -47,11 +50,19 @@ def menu(screen : pygame) -> None:
             elif state == "Controls":
                 screen.blit(INSTRUCTIONS, [0,0])  
             elif state == "Leaderboard":
-                screen.blit(LEADERBOARD, [0,0])  
+                y = 100
+                for x in res:
+                    GAME_FONT.render_to(screen, (390, y), str(x["Name"]) + ':   '+  str(x["Score"]), (255, 255, 255))
+                    y += 75
             elif state == "Start":
                 game_loop(screen)
-                showMenu = False
-                break
+                screen.blit(LEADERBOARD, [0,0])  
+                y = 100
+                for x in res:
+                    GAME_FONT.render_to(screen, (390, y), str(x["Name"]) + ':   '+  str(x["Score"]), (255, 255, 255))
+                    y += 75
+                state = "Leaderboard"
+                
 
 
 def start_game(event, state) -> bool:
@@ -61,6 +72,7 @@ def start_game(event, state) -> bool:
             if y > 180 and y < 250 and state == "Menu":
                 return "Controls"
             elif y > 297 and y < 361 and state == "Menu":
+                screen.blit(LEADERBOARD, [0,0])  
                 return "Leaderboard"
             elif y > 408 and y < 468 and state == "Menu":
                 return "Start"
@@ -73,8 +85,6 @@ def start_game(event, state) -> bool:
     else:
         return state
 
-def leaderboard():
-    name = ""
 
 
 
@@ -233,10 +243,18 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen, enemi
         screen.fill((255, min(255, max(0, round(255 * (1-.5)))), min(255, max(0, round(255 * (.5))))), special_flags = pygame.BLEND_MULT)
     return timer, True, enemies_remaining
         
-    
-    
+def get_database():
+    CONNECTION_STRING = "mongodb+srv://testUser:test123@cluster0.xa5sn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    client = MongoClient(CONNECTION_STRING)
+    db = client['dragonSlayer']
+    return db['Leaderboard']
 
- 
+def insert_db(db, name, score):
+    db.insert_one({"Name" : name, "Score": score})
+
+def get_top_five(db):
+    return db.find().sort("Score", -1).limit(5)
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         print(sys.argv[1])
