@@ -20,7 +20,7 @@ sys.path.append(os.path.abspath(constants))
 
 pygame.init()
 
-from constants import WIDTH, HEIGHT, BACKGROUND, HEART, GOLDHEART, NOATTACK, GAME_FONT, HOME, INSTRUCTIONS
+from constants import WIDTH, HEIGHT, BACKGROUND, HEART, GOLDHEART, NOATTACK, GAME_FONT, HOME, INSTRUCTIONS, LEADERBOARD
 import character
 import enemy
 import dragon
@@ -41,17 +41,42 @@ def menu(screen : pygame) -> None:
         pygame.display.update()
         for event in pygame.event.get():
             showMenu = quit(event)
-            state = start_game(event)
+            state = start_game(event, state)
             if state == "Menu":
                 screen.blit(HOME, [0,0])  
             elif state == "Controls":
                 screen.blit(INSTRUCTIONS, [0,0])  
             elif state == "Leaderboard":
-                print("leaderboard")
-                screen.blit(BACKGROUND, [0,0])  
+                screen.blit(LEADERBOARD, [0,0])  
             elif state == "Start":
                 game_loop(screen)
-            
+                showMenu = False
+                break
+
+
+def start_game(event, state) -> bool:
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        x, y = pygame.mouse.get_pos()
+        if x > 405 and x < 590:
+            if y > 180 and y < 250 and state == "Menu":
+                return "Controls"
+            elif y > 297 and y < 361 and state == "Menu":
+                return "Leaderboard"
+            elif y > 408 and y < 468 and state == "Menu":
+                return "Start"
+            elif y > 462 and y < 510 and (state == "Controls" or state == "Leaderboard"):
+                return "Menu"
+            else:
+                return state
+        else:
+            return state
+    else:
+        return state
+
+def leaderboard():
+    name = ""
+
+
 
 def game_loop(screen) -> None:
     playing : bool = True
@@ -76,8 +101,10 @@ def game_loop(screen) -> None:
         pygame.display.update()
         for event in pygame.event.get():
             if not quit(event):
-                return False
-
+                playing = False
+        
+        if not playing:
+            break
         key_input = pygame.key.get_pressed()  
         attacking, counter, just_jumped = determine_player_action(player, key_input, just_jumped, attacking, counter)
         x, dir = player.coordinates_and_dir()
@@ -90,6 +117,9 @@ def game_loop(screen) -> None:
         GAME_FONT.render_to(screen, (420, 20), f"Enemies: {enemies_remaining + 3}", (255, 255, 255))
         if counter > 12:
             screen.blit(NOATTACK, [800,10]) 
+        if player.get_hearts() <= 0:
+            playing = False
+            break
         pygame.display.update()
         clock.tick(30)
         hurt_timer += 1
@@ -98,21 +128,6 @@ def game_loop(screen) -> None:
 
 def quit(event) -> bool:
     return event.type != pygame.QUIT
-
-
-def start_game(event) -> bool:
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        x, y = pygame.mouse.get_pos()
-        if x > 405 and x < 590:
-            if y > 180 and y < 250:
-                return "Controls"
-            elif y > 297 and y < 361:
-                return "Leaderboard"
-            elif y > 408 and y < 468:
-                print("start")
-                return "Start"
-            #return event.pos[0] in range(0, WIDTH) and event.pos[1] in range(0, HEIGHT)
-    
 
 def create_enemies(size : int, surface):
     enemies = []
@@ -223,6 +238,12 @@ def checkCollision(enemies, enemy_sprites, player, dragons, timer, screen, enemi
 
  
 if __name__ == '__main__':
-    screen = pygame_setup(WIDTH, HEIGHT)
+    if len(sys.argv) > 1:
+        print(sys.argv[1])
+        screen = pygame_setup(WIDTH, HEIGHT)
+        menu(screen)
+    else:
+        print("Restart the program and pass your name as an argument")
 
-    menu(screen)
+
+    
