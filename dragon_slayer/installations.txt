@@ -1,0 +1,2 @@
+conda install -c anaconda pymongo
+python -m pip install pymongo[srv]

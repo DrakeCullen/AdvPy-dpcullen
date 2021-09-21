@@ -29,61 +29,54 @@ import fireball
 
 
 def pygame_setup(width : int, height: int) -> None:
+    dragonSlayer = get_database()
+    names, scores = get_top_five(dragonSlayer)
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Dragon Slayer")  
     screen.blit(HOME, [0,0])   
-    return screen
+    return screen, names, scores, dragonSlayer
 
 
-def menu(screen : pygame) -> None:
+def menu(screen : pygame, names, scores, dragonSlayer, playerName) -> None:
+    screen.blit(HOME, [0,0])  
     state = "Menu"
     showMenu = True
-    dragonSlayer = get_database()
-    res = get_top_five(dragonSlayer)
+    
     while showMenu:
         pygame.display.update()
         for event in pygame.event.get():
             showMenu = quit(event)
-            state = start_game(event, state)
-            if state == "Menu":
-                screen.blit(HOME, [0,0])  
-            elif state == "Controls":
-                screen.blit(INSTRUCTIONS, [0,0])  
-            elif state == "Leaderboard":
-                y = 100
-                for x in res:
-                    GAME_FONT.render_to(screen, (390, y), str(x["Name"]) + ':   '+  str(x["Score"]), (255, 255, 255))
-                    y += 75
-            elif state == "Start":
-                game_loop(screen)
-                screen.blit(LEADERBOARD, [0,0])  
-                y = 100
-                for x in res:
-                    GAME_FONT.render_to(screen, (390, y), str(x["Name"]) + ':   '+  str(x["Score"]), (255, 255, 255))
-                    y += 75
-                state = "Leaderboard"
+            state = start_game(event, state, names, scores, False)
+            if state == "Start":
+                score = game_loop(screen)
+                print(score)
+                insert_db(dragonSlayer, playerName, score)
+                names, scores = get_top_five(dragonSlayer)
+                state = start_game(event, "Leaderboard", names, scores, True)
+                
                 
 
 
-def start_game(event, state) -> bool:
+def start_game(event, state, names, scores, reset) -> bool:
     if event.type == pygame.MOUSEBUTTONDOWN:
         x, y = pygame.mouse.get_pos()
-        if x > 405 and x < 590:
+        if x > 405 and x < 590 or reset == True:
             if y > 180 and y < 250 and state == "Menu":
+                screen.blit(INSTRUCTIONS, [0,0])  
                 return "Controls"
-            elif y > 297 and y < 361 and state == "Menu":
-                screen.blit(LEADERBOARD, [0,0])  
+            elif y > 297 and y < 361 and state == "Menu" or reset == True:
+                screen.blit(LEADERBOARD, [0,0]) 
+                y = 100
+                for i in range(len(names)):
+                    GAME_FONT.render_to(screen, (390, y), f"{names[i]} : {scores[i]}", (255, 255, 255))
+                    y += 75 
                 return "Leaderboard"
             elif y > 408 and y < 468 and state == "Menu":
                 return "Start"
             elif y > 462 and y < 510 and (state == "Controls" or state == "Leaderboard"):
+                screen.blit(HOME, [0,0]) 
                 return "Menu"
-            else:
-                return state
-        else:
-            return state
-    else:
-        return state
+    return state
 
 
 
@@ -134,6 +127,7 @@ def game_loop(screen) -> None:
         clock.tick(30)
         hurt_timer += 1
         score -= 1
+    return score + player.get_hearts() * 800
 
 
 def quit(event) -> bool:
@@ -253,13 +247,18 @@ def insert_db(db, name, score):
     db.insert_one({"Name" : name, "Score": score})
 
 def get_top_five(db):
-    return db.find().sort("Score", -1).limit(5)
+    names = []
+    scores = []
+    leaders = db.find().sort("Score", -1).limit(5)
+    for leader in leaders:
+        names.append(leader["Name"])
+        scores.append(leader["Score"])
+    return names, scores
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        print(sys.argv[1])
-        screen = pygame_setup(WIDTH, HEIGHT)
-        menu(screen)
+        screen, names, scores, dragonSlayer = pygame_setup(WIDTH, HEIGHT)
+        menu(screen, names, scores, dragonSlayer, sys.argv[1])
     else:
         print("Restart the program and pass your name as an argument")
 
