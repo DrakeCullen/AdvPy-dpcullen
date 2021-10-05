@@ -9,7 +9,9 @@ My game satisfies all of the requirements and adds bells and whistles. Character
 <br/>
 
 ### Installation Instructions
-To install the game, clone this github repository. Next, run "INSERT PIP commands here".
+To install the game, clone this github repository. Next, run:
+pip install pymongo
+pip install pymongo[srv]
 <br/>
 
 Run the game by typing: ./main.py \[yourName].
