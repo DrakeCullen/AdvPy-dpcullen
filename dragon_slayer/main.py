@@ -6,19 +6,6 @@ import sys
 import pygame.freetype
 from pymongo import MongoClient, MongoClient
 
-
-characterPath = "./character.py"
-sys.path.append(os.path.abspath(characterPath))
-enemyPath = "./enemy.py"
-sys.path.append(os.path.abspath(enemyPath))
-dragonPath = "./dragon.py"
-sys.path.append(os.path.abspath(dragonPath))
-fireballPath = "./fireball.py"
-sys.path.append(os.path.abspath(fireballPath))
-constants = "./constants.py"
-sys.path.append(os.path.abspath(constants))
-
-
 pygame.init()
 
 from constants import WIDTH, HEIGHT, BACKGROUND, HEART, GOLDHEART, NOATTACK, GAME_FONT, HOME, INSTRUCTIONS, LEADERBOARD
@@ -93,7 +80,7 @@ def game_loop(screen) -> None:
     hurt_timer : int = 0
     counter = 0
     attacking = False
-    score = 5000 
+    score = 2000 
     enemies_remaining = 6
     pygame.mixer.init()
     pygame.mixer.music.load('music.wav')
@@ -107,6 +94,8 @@ def game_loop(screen) -> None:
                 playing = False
         
         if not playing:
+            score = 0
+            player.set_hearts(0)
             break
         key_input = pygame.key.get_pressed()  
         attacking, counter, just_jumped = determine_player_action(player, key_input, just_jumped, attacking, counter)
@@ -127,7 +116,7 @@ def game_loop(screen) -> None:
         clock.tick(30)
         hurt_timer += 1
         score -= 1
-    return score + player.get_hearts() * 800
+    return score + player.get_hearts() * 1500
 
 
 def quit(event) -> bool:

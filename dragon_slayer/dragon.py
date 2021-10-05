@@ -108,7 +108,6 @@ class Dragon(pygame.sprite.Sprite):
             if  timer > 40 and player_x <= enemy_x + enemy_width and player_x + 67 >= enemy_x and player_y + 10 >= enemy_y:
                 self.last_hurt_time = datetime.datetime.now()
                 hearts -= 1
-                print(hearts)
                 timer = 0
         return hearts, timer
 

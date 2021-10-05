@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import pygame
 import os
 import datetime
@@ -28,7 +30,7 @@ class Character(pygame.sprite.Sprite):
         self.player_width : int = 35
         self.width_right : int = 67
         self.player_height : int = 40
-        self.hearts : int = 1
+        self.hearts : int = 20
         self.last_hit_time = datetime.datetime.now()
         self.attack_time = 0
  
@@ -115,7 +117,7 @@ class Character(pygame.sprite.Sprite):
     def enemy_collision(self, enemy_x, enemy_y, enemy_width, enemy_height, timer) -> str:
         player_x = self.x
 
-        if  player_x <= enemy_x + enemy_width + 30 and player_x + self.width_right >= enemy_x -30 and self.y + self.player_height >= enemy_y and self.row == 3: 
+        if  player_x <= enemy_x + enemy_width + 50 and player_x + self.width_right >= enemy_x - 50 and self.y + self.player_height >= enemy_y and self.row == 3: 
             return "Hit"
         elif player_x <= enemy_x + enemy_width and player_x + self.width_right >= enemy_x and self.y + self.player_height >= enemy_y and timer > 50:
             self.hearts -= .5
