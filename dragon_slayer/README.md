@@ -10,7 +10,11 @@ My game satisfies all of the requirements and adds bells and whistles. Character
 
 ### Installation Instructions
 To install the game, clone this github repository. Next, run:
-pip install pymongo
+<br/>
+
+pip install pygame
+<br/>
+
 pip install pymongo[srv]
 <br/>
 
