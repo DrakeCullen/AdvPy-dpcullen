@@ -19,7 +19,6 @@ pip install pymongo[srv]
 <br/>
 
 Run the game by typing: ./main.py \[yourName].
-"node main.js".
 <br/>
 
 ### Objective
