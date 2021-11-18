@@ -36,3 +36,18 @@
 | Location            | https://github.com/DrakeCullen/AdvPy-dpcullen/tree/main/kattis                                                              |
 | Self Grade              | 100                                        |
 | Notes                 | All requirements were met. I choose problems with difficulties of 4.0, 3.7, and 3.2.
+
+
+<br/>
+
+## Final Project
+
+| Name                | Value                                                                 |
+| -------------       | -------------                                                         |
+| Name                | Final Project                                           | 
+| Description         | Complete three Kattis problem with unit testing.                                                           |
+| Due Date            | 14-Dec-21                                                          |
+| Status              | Completed                                        |
+| Location            | https://github.com/DrakeCullen/AdvPy-dpcullen/tree/main/final                                                              |
+| Self Grade              | 100                                        |
+| Notes                 | All requirements were met. I choose problems with difficulties of 4.9, 4.6, and 4.4. Unittesting was incorporated.
